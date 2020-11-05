@@ -224,6 +224,7 @@
       var courseStudentDone = false;
 
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
+      //this is called each time the selected value for the "courses" dropdownlist is changed
       function FetchData(courseName) {
         accesskey = document.getElementById("accesskey").value
         var courseID = GetCourseIDByName(courseName);
@@ -329,6 +330,7 @@
         return rels;
       }
 
+      //may change to while loop
       async function ReturnAllRemaining(linkHeader, accesskey, callType) {
 
         var linkParser = ParseLinkHead(linkHeader)
