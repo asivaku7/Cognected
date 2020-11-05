@@ -3,7 +3,7 @@
   <head>
     <!-- Scripts & Link for rangeSlider -->
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css" />-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
 
@@ -188,9 +188,9 @@
       <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center">
       <br /> <br />
 
-      <div class="container-RS">
+      <!--<div class="container-RS">
         <input type="text" class="js-range-slider-1" name="my_range" value="" />
-      </div>
+      </div>-->
     </center>
 
 
@@ -345,7 +345,7 @@
               var remainingPages = xhr.getResponseHeader("link");
 
               if (callType == "Students") {
-                //GetStudentsInCourse(res);
+                GetStudentsInCourse(res);
                 courseStudentData = courseStudentData.concat(res)
               } else if (callType == "Grades") {
                 courseGradeData = courseGradeData.concat(res);
@@ -365,7 +365,7 @@
 
           if (callType == "Students") {
             courseStudentDone = true
-            GetStudentsInCourse(courseStudentData);
+            //GetStudentsInCourse(courseStudentData);
           }
 
           //flag that data is done being retrieved maybe flag for each type
@@ -6989,18 +6989,18 @@
         GetCourseData();
       })
 
-      $(".js-range-slider-1").ionRangeSlider({
-        skin: "sharp",
-        type: "double",
-        min: 0,
-        max: 100,
-        from: 20,
-        to: 50,
-        step: 10,
-        grid: true,
-        grid_num: 10,
-        force_edges: true
-      });
+      // $(".js-range-slider-1").ionRangeSlider({
+      //   skin: "sharp",
+      //   type: "double",
+      //   min: 0,
+      //   max: 100,
+      //   from: 20,
+      //   to: 50,
+      //   step: 10,
+      //   grid: true,
+      //   grid_num: 10,
+      //   force_edges: true
+      // });
 
       drawGraph();
     </script>
