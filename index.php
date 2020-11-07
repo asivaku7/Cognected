@@ -1,1 +1,3 @@
-<?php include_once("working.html"); ?>
+<?php include_once("working.html");
+       header("Access-Control-Allow-Origin: *");
+?>
