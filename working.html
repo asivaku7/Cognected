@@ -236,7 +236,9 @@
         $.ajax({
           url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=300',
           datatype: "jsonp",
-          crossDomain: true,
+          xhrFields: {
+              withCredentials: true
+          },
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
           },
@@ -257,7 +259,6 @@
         $.ajax({
           url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=300',
           datatype: "json",
-          crossDomain: true,
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
           },
@@ -278,7 +279,6 @@
         $.ajax({
           url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
           datatype: "jsonp",
-          crossDomain: true,
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
           },
