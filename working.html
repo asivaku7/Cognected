@@ -224,7 +224,7 @@
       var courseAssignmentDone = false;
       var courseGradeDone = false;
       var courseStudentDone = false;
-      var corsAnywhere = "https://github.com/Rob--W/cors-anywhere/"
+      var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"
 
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
       //this is called each time the selected value for the "courses" dropdownlist is changed
@@ -237,7 +237,7 @@
         var courseStudentDone = false;
 
         $.ajax({
-          url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=300',
+          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=300',
           datatype: "jsonp",
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
@@ -257,7 +257,7 @@
         })
 
         $.ajax({
-          url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=300',
+          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=300',
           datatype: "json",
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
@@ -277,7 +277,7 @@
         })
 
         $.ajax({
-          url: 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
+          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
           datatype: "jsonp",
           beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
@@ -410,10 +410,10 @@
         enrollmentTypes.forEach((item, i) => {
           $.ajax({
             url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
-            datatype: "application/json",
+            datatype: "json",
+            method: 'GET',
             headers: {
-              "x-requested-with": "xhr",
-              'Origin' : 'https://cognected.herokuapp.com/',
+              'x-requested-with': 'xhr',
               'Authorization' : 'Bearer ' + accesskey
             },
             beforeSend: function(xhr) {
