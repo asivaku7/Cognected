@@ -411,7 +411,11 @@
           $.ajax({
             url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
             datatype: "application/json",
-            headers: {'Authorization' : 'Bearer ' + accesskey},
+            headers: {
+              "x-requested-with": "xhr",
+              'Origin' : 'https://cognected.herokuapp.com/',
+              'Authorization' : 'Bearer ' + accesskey
+            },
             beforeSend: function(xhr) {
               //xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
             },
