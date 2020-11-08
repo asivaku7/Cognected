@@ -15,6 +15,8 @@
       <h1 style="color:white">CognectEd Demo Testing Pyvis/vis.js</h1>
     </center>
 
+    <meta name="referrer" content="no-referrer" />
+
     <style type="text/css">
       #mynetwork {
         width: 50%;
@@ -408,7 +410,7 @@
           $.ajax({
             url: 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
             datatype: "json",
-            headers: {'Access-Control-Allow-Origin':'https://cognected.herokuapp.com/',
+            headers: {'Access-Control-Allow-Origin':'*',
                       'Access-Control-Allow-Methods':'GET, POST, PATCH, PUT, DELETE, OPTIONS',
                       'Access-Control-Allow-Headers':' Origin, Content-Type, X-Auth-Token'},
             beforeSend: function(xhr) {
