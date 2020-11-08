@@ -224,6 +224,7 @@
       var courseAssignmentDone = false;
       var courseGradeDone = false;
       var courseStudentDone = false;
+      var corsAnywhere = "https://github.com/Rob--W/cors-anywhere/"
 
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
       //this is called each time the selected value for the "courses" dropdownlist is changed
@@ -408,10 +409,9 @@
         //get course data for each enrollment type
         enrollmentTypes.forEach((item, i) => {
           $.ajax({
-            url: 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
+            url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
             datatype: "application/json",
-            headers: {  'Origin': 'https://cognected.herokuapp.com/',
-                        'Authorization' : 'Bearer ' + accesskey},
+            headers: {'Authorization' : 'Bearer ' + accesskey},
             beforeSend: function(xhr) {
               //xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
             },
