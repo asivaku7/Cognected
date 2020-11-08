@@ -408,7 +408,7 @@
           $.ajax({
             url: 'https://asu.instructure.com/api/v1/courses?enrollment_role=' + item,
             datatype: "json",
-            headers: {'Access-Control-Allow-Origin':'*',
+            headers: {'Access-Control-Allow-Origin':'https://cognected.herokuapp.com/',
                       'Access-Control-Allow-Methods':'GET, POST, PATCH, PUT, DELETE, OPTIONS',
                       'Access-Control-Allow-Headers':' Origin, Content-Type, X-Auth-Token'},
             beforeSend: function(xhr) {
