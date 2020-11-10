@@ -337,7 +337,7 @@
 
         if (linkParser.last === undefined || linkParser.current.href != linkParser.last.href) {
           $.ajax({
-            url: linkParser.next.href,
+            url: corsAnywhere + linkParser.next.href,
             datatype: "jsonp",
             crossDomain: true,
             beforeSend: function(xhr) {
