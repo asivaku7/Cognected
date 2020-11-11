@@ -12,7 +12,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
 
     <center>
-      <h1 style="color:white">CognectEd Demo Testing Pyvis/vis.js</h1>
+      <h1 style="color:white">CognectEd</h1>
     </center>
 
     <meta name="referrer" content="no-referrer" />
@@ -221,154 +221,205 @@
       var courseAssignmentData;
       var courseGradeData;
       var courseStudentData;
-      var courseAssignmentDone = false;
-      var courseGradeDone = false;
-      var courseStudentDone = false;
-      var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"
+      var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/" //NEEDED TO CREATE A 'PROPER' CORS API CALL
 
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
       //this is called each time the selected value for the "courses" dropdownlist is changed
-      function FetchData(courseName) {
+      async function FetchData(courseName) {
+
+        //Retrieve relevant information for the API call
         accesskey = document.getElementById("accesskey").value
         var courseID = GetCourseIDByName(courseName);
 
-        var courseAssignmentDone = false;
-        var courseGradeDone = false;
-        var courseStudentDone = false;
+        try{
+            //Canvas API call for the ASSIGNMENT for the given course
+            await $.ajax({
+              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=100',
+              datatype: "jsonp",
+              headers: {"Authorization": "Bearer " + accesskey,
+                        "x-requested-with": "xhr"},
+              success: async function(res, status, xhr) {
+                await sleep(75)
+                console.log("ASSIGNMENTS");
+                var remainingPages = xhr.getResponseHeader("link");
 
-        $.ajax({
-          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=300',
-          datatype: "jsonp",
-          beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
-          },
-          success: function(res, status, xhr) {
-            console.log("ASSIGNMENTS");
-            var remainingPages = xhr.getResponseHeader("link");
+                if (remainingPages != null) {
+                  courseGradeData = res
+                  await ReturnAllRemaining(remainingPages, accesskey, "Assignments");
+                }
 
-            if (remainingPages != "") {
-              courseGradeData = res
-              ReturnAllRemaining(remainingPages, accesskey, "Assignments");
-            }
-          },
-          error: function(xhr, status, error) {
-            console.log(xhr.responseText);
-          },
-        })
+              },
+              error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+              },
+            })
+          }
+          catch (e){
+            console.log(e);
+          }
 
-        $.ajax({
-          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=300',
-          datatype: "json",
-          beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
-          },
-          success: function(res, status, xhr) {
-            console.log("GRADEBOOK HISTORY");
-            var remainingPages = xhr.getResponseHeader("link");
+          try{
+            //Canvas API call for the grade history for the given course
+            await $.ajax({
+              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=100',
+              datatype: "json",
+              headers: {"Authorization": "Bearer " + accesskey,
+                        "x-requested-with": "xhr"},
+              success: async function(res, status, xhr) {
+                await sleep(75)
+                console.log("GRADEBOOK HISTORY");
+                var remainingPages = xhr.getResponseHeader("link");
 
-            if (remainingPages != "") {
-              courseGradeData = res
-              ReturnAllRemaining(remainingPages, accesskey, "Grades");
-            }
-          },
-          error: function(xhr, status, error) {
-            console.log(xhr.responseText);
-          },
-        })
+                if (remainingPages != null) {
+                  courseGradeData = res
+                  await ReturnAllRemaining(remainingPages, accesskey, "Grades");
+                }
+              },
+              error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+              },
+            })
+          }
+          catch (e){
+            console.log(e);
+          }
 
-        $.ajax({
-          url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
-          datatype: "jsonp",
-          beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
-          },
-          success: function(res, status, xhr) {
-            var remainingPages = xhr.getResponseHeader("link");
+          try{
+            //Canvas API call to retrive student data for the given course
+            res = await $.ajax({
+              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
+              datatype: "jsonp",
+              headers: {"Authorization": "Bearer " + accesskey,
+                        "x-requested-with": "xhr"},
+              success: async function(res, status, xhr) {
+                await sleep(75)
 
-            if (remainingPages != "") {
-              document.getElementById("students").innerHTML = "<option>All Enrolled Students</option>";
-              GetStudentsInCourse(res);
-              ReturnAllRemaining(remainingPages, accesskey, "Students");
-            }
-          },
-          error: function(xhr, status, error) {
-            console.log(xhr.responseText);
-          },
-        })
+                console.log("STUDENTS");
+                var remainingPages = xhr.getResponseHeader("link");
+                courseStudentData = res
+
+                //checks that the remaing pages header is active
+                if (remainingPages != null) {
+                  //clear out the student data
+                  document.getElementById("students").disabled = true;
+                  document.getElementById("students").innerHTML = "<option>All Enrolled Students</option>";
+                  await ReturnAllRemaining(remainingPages, accesskey, "Students");
+                  //GetStudentsInCourse(courseStudentData);
+                }
+
+                GetStudentsInCourse(courseStudentData);
+              },
+              error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+              },
+            })
+          }
+          catch (e){
+            console.log(e);
+          }
+
       }
 
+
+      //helper for ParseLinkHead Function
+      //from https://bill.burkecentral.com/2009/10/15/parsing-link-headers-with-javascript-and-java/
       function unquote(value) {
         if (value.charAt(0) == '"' && value.charAt(value.length - 1) == '"') return value.substring(1, value.length - 1);
         return value;
       }
 
-      function ParseLinkHead(header) {
+      //function to parse the link header
+      //from https://bill.burkecentral.com/2009/10/15/parsing-link-headers-with-javascript-and-java/
+      function ParseLinkHead(value) {
         var linkexp = /<[^>]*>\s*(\s*;\s*[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*")))*(,|$)/g;
         var paramexp = /[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*"))/g;
 
-        var matches = header.match(linkexp);
+        var matches = value.match(linkexp);
         var rels = new Object();
-        for (i = 0; i < matches.length; i++) {
-          var split = matches[i].split('>');
-          var href = split[0].substring(1);
-          var ps = split[1];
-          var link = new Object();
-          link.href = href;
-          var s = ps.match(paramexp);
-          for (j = 0; j < s.length; j++) {
-            var p = s[j];
-            var paramsplit = p.split('=');
-            var name = paramsplit[0];
-            link[name] = unquote(paramsplit[1]);
-          }
+        var titles = new Object();
+        for (i = 0; i < matches.length; i++)
+        {
+           var split = matches[i].split('>');
+           var href = split[0].substring(1);
+           var ps = split[1];
+           var link = new Object();
+           link.href = href;
+           var s = ps.match(paramexp);
+           for (j = 0; j < s.length; j++)
+           {
+              var p = s[j];
+              var paramsplit = p.split('=');
+              var name = paramsplit[0];
+              link[name] = unquote(paramsplit[1]);
+           }
 
-          if (link.rel != undefined) {
-            rels[link.rel] = link;
-          }
+           if (link.rel != undefined)
+           {
+              rels[link.rel] = link;
+           }
+           if (link.title != undefined)
+           {
+              titles[link.title] = link;
+           }
         }
-
-        return rels;
+        var linkheader = new Object();
+        linkheader.rels = rels;
+        linkheader.titles = titles;
+        return linkheader;
       }
 
-      //may change to while loop
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      //Function to retrieve all remaining json data if there are more than 100 results from the previous call
       async function ReturnAllRemaining(linkHeader, accesskey, callType) {
 
         var linkParser = ParseLinkHead(linkHeader)
+        var remainingPages;
 
-        if (linkParser.last === undefined || linkParser.current.href != linkParser.last.href) {
-          $.ajax({
-            url: corsAnywhere + linkParser.next.href,
-            datatype: "jsonp",
-            crossDomain: true,
-            beforeSend: function(xhr) {
-              xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
-            },
-            success: function(res, status, xhr) {
-              var remainingPages = xhr.getResponseHeader("link");
+        //while there is no last page or the current page does not equal the last page
+        while (linkParser.rels.last === undefined || linkParser.rels.current.href != linkParser.rels.last.href) {
+            $.ajax({
+              url: corsAnywhere + linkParser.rels.next.href,
+              datatype: "jsonp",
+              headers: {"Authorization": "Bearer " + accesskey,
+                        "x-requested-with": "xhr"},
+              success: async function(res, status, xhr) {
+                await sleep(50)
+                remainingPages = xhr.getResponseHeader("link");
 
-              if (callType == "Students") {
-                GetStudentsInCourse(res);
-                courseStudentData = courseStudentData.concat(res)
-              } else if (callType == "Grades") {
-                courseGradeData = courseGradeData.concat(res);
-              } else if (callType == "Assignments") {
-                courseAssignmentData = courseAssignmentData.concat(res);
+                //make sure that there was a link header in the last call
+                if(remainingPages != null && remainingPages != undefined){
+                  console.log("New Page " + callType )
+
+                  if (callType == "Students") {
+                      courseStudentData = courseStudentData.concat(res)
+                  } else if (callType == "Grades") {
+                      courseGradeData = courseGradeData.concat(res);
+                  } else if (callType == "Assignments") {
+                      courseAssignmentData = courseGradeData.concat(res);
+                  }
+
+                  //set the current linkparser to the new link header
+                  linkParser = ParseLinkHead(remainingPages)
+                }
+              },
+              error: function(xhr, status, error) {
+                console.log(xhr.responseText);
               }
+            })
 
-              if (remainingPages != "") {
-                ReturnAllRemaining(remainingPages, accesskey, callType);
-              }
-            },
-            error: function(xhr, status, error) {
-              console.log(xhr.responseText);
-            },
-          })
+            await sleep(100)
         }
       }
 
+      //concatenate the given enrollment data to the students list
       function GetStudentsInCourse(enrollmentData) {
+        //variable to concatenate onto the current classes
         var catOptions = document.getElementById("students").innerHTML;
 
+        //foreach iterates through all the students
         enrollmentData.forEach((item, i) => {
           if (item.user.name != undefined && item.type == "StudentEnrollment") {
             catOptions += "<option>" + item.user.name + "</option>";
@@ -376,12 +427,17 @@
         })
 
         document.getElementById("students").innerHTML = catOptions;
+
+        document.getElementById("students").disabled = false;
       }
 
+      //event raised when the selected student list value is changed
       function SelectedStudentChanged(studentName) {
 
       }
 
+      //Populates the course list with the given class data
+      //concatenates the data with the current data in the course list
       function PopulateOnLoad(classData) {
         var catOptions = document.getElementById("course").innerHTML;
         courses = courses.concat(classData);
@@ -403,9 +459,13 @@
         return courses.find(course => course.name === courseName).id;
       }
 
+      //Get the course data with the given enrollment types
       function GetCourseData() {
+
+        //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
         var enrollmentTypes = ['StudentEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'ObserverEnrollment', 'DesignerEnrollment']
         accesskey = document.getElementById("accesskey").value
+
         //get course data for each enrollment type
         enrollmentTypes.forEach((item, i) => {
           $.ajax({
@@ -6885,6 +6945,7 @@
 
       }
 
+      //used to highlight nodes may change based on generating code
       function neighbourhoodHighlight(params) {
         // if something is selected:
         if (params.nodes.length > 0) {
@@ -6966,20 +7027,23 @@
         nodes.update(updateArray);
       }
 
+      //event raised when the test button is clicked
       function btn_testClick() {
         console.log("Button Test Clicked");
       }
 
+      //place holder function may not be used
       function RemakeNodeStructure() {
 
       }
 
+      //place holder function may not be used
       function RemakeEdgeStructure() {
 
       }
 
+      //************************** start of main() **************************
 
-      //start of main()
       $(document).ready(function() {
         GetCourseData();
       })
