@@ -380,7 +380,7 @@
 
         //while there is no last page or the current page does not equal the last page
         while (linkParser.rels.last === undefined || linkParser.rels.current.href != linkParser.rels.last.href) {
-            $.ajax({
+            await $.ajax({
               url: corsAnywhere + linkParser.rels.next.href,
               datatype: "jsonp",
               headers: {"Authorization": "Bearer " + accesskey,
