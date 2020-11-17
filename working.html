@@ -180,11 +180,11 @@
       </select>
       <br /> <br />
 
-      <label for="student" style="color: white">Selected Student</label>
+      <!--<label for="student" style="color: white">Selected Student</label>
       <select name="students" id="students" onchange="SelectedStudentChanged(this.value)" style="text-align:center">
         <option value="">All Enrolled Students</option>
       </select>
-      <br /> <br />
+      <br /> <br />-->
 
       <label for="accesskey" style="color: white">Access Token</label>
       <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center">
@@ -220,8 +220,10 @@
       var courses = [];
       var courseAssignmentData;
       var courseGradeData;
-      var courseStudentData;
-      var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/" //NEEDED TO CREATE A 'PROPER' CORS API CALL
+      var Assignments = {};
+      var Keywords = [];
+      var keywordCount = 0;
+      var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"; //NEEDED TO CREATE A 'PROPER' CORS API CALL
 
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
       //this is called each time the selected value for the "courses" dropdownlist is changed
@@ -231,95 +233,147 @@
         accesskey = document.getElementById("accesskey").value
         var courseID = GetCourseIDByName(courseName);
 
+        AjaxCallAssignments(courseID, accesskey)
+
+        /*
+        //Class enrollment call no longer needed until further notice
         try{
-            //Canvas API call for the ASSIGNMENT for the given course
-            await $.ajax({
-              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=100',
-              datatype: "jsonp",
-              headers: {"Authorization": "Bearer " + accesskey,
-                        "x-requested-with": "xhr"},
-              success: async function(res, status, xhr) {
-                await sleep(75)
-                console.log("ASSIGNMENTS");
-                var remainingPages = xhr.getResponseHeader("link");
+          //Canvas API call to retrive student data for the given course
+          res = await $.ajax({
+            url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
+            datatype: "jsonp",
+            headers: {"Authorization": "Bearer " + accesskey,
+                      "x-requested-with": "xhr"},
+            success: async function(res, status, xhr) {
+              await sleep(75)
 
-                if (remainingPages != null) {
-                  courseGradeData = res
-                  await ReturnAllRemaining(remainingPages, accesskey, "Assignments");
-                }
+              console.log("STUDENTS");
+              var remainingPages = xhr.getResponseHeader("link");
+              courseStudentData = res
 
-              },
-              error: function(xhr, status, error) {
-                console.log(xhr.responseText);
-              },
-            })
-          }
-          catch (e){
-            console.log(e);
-          }
+              //checks that the remaing pages header is active
+              if (remainingPages != null) {
+                //clear out the student data
+                document.getElementById("students").disabled = true;
+                document.getElementById("students").innerHTML = "<option>All Enrolled Students</option>";
+                await ReturnAllRemaining(remainingPages, accesskey, "Students");
+                //GetStudentsInCourse(courseStudentData);
+              }
 
-          try{
-            //Canvas API call for the grade history for the given course
-            await $.ajax({
-              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=100',
-              datatype: "json",
-              headers: {"Authorization": "Bearer " + accesskey,
-                        "x-requested-with": "xhr"},
-              success: async function(res, status, xhr) {
-                await sleep(75)
-                console.log("GRADEBOOK HISTORY");
-                var remainingPages = xhr.getResponseHeader("link");
-
-                if (remainingPages != null) {
-                  courseGradeData = res
-                  await ReturnAllRemaining(remainingPages, accesskey, "Grades");
-                }
-              },
-              error: function(xhr, status, error) {
-                console.log(xhr.responseText);
-              },
-            })
-          }
-          catch (e){
-            console.log(e);
-          }
-
-          try{
-            //Canvas API call to retrive student data for the given course
-            res = await $.ajax({
-              url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/enrollments?per_page=100',
-              datatype: "jsonp",
-              headers: {"Authorization": "Bearer " + accesskey,
-                        "x-requested-with": "xhr"},
-              success: async function(res, status, xhr) {
-                await sleep(75)
-
-                console.log("STUDENTS");
-                var remainingPages = xhr.getResponseHeader("link");
-                courseStudentData = res
-
-                //checks that the remaing pages header is active
-                if (remainingPages != null) {
-                  //clear out the student data
-                  document.getElementById("students").disabled = true;
-                  document.getElementById("students").innerHTML = "<option>All Enrolled Students</option>";
-                  await ReturnAllRemaining(remainingPages, accesskey, "Students");
-                  //GetStudentsInCourse(courseStudentData);
-                }
-
-                GetStudentsInCourse(courseStudentData);
-              },
-              error: function(xhr, status, error) {
-                console.log(xhr.responseText);
-              },
-            })
-          }
-          catch (e){
-            console.log(e);
-          }
+              GetStudentsInCourse(courseStudentData);
+            },
+            error: function(xhr, status, error) {
+              console.log(xhr.responseText);
+            },
+          })
+        }
+        catch (e){
+          console.log(e);
+        }
+        */
 
       }
 
+
+      //Ajax function to call assignment data
+      async function AjaxCallAssignments(courseID, accesskey){
+        try {
+          //Canvas API call for the ASSIGNMENT for the given course
+          $.ajax({
+            url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/assignments?per_page=100',
+            datatype: "jsonp",
+            headers: {
+              "Authorization": "Bearer " + accesskey,
+              "x-requested-with": "xhr"
+            },
+            success: async function(res, status, xhr) {
+              await sleep(75)
+              console.log("ASSIGNMENTS");
+              var remainingPages = xhr.getResponseHeader("link");
+              courseAssignmentData = res
+
+              if (remainingPages != null) {
+                await ReturnAllRemaining(remainingPages, accesskey, "Assignments");
+              }
+
+              ParseJsonToAssignment()
+
+              AjaxCallGrade(courseID, accesskey)
+            },
+            error: function(xhr, status, error) {
+              console.log(xhr.responseText);
+            },
+          })
+
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      //Ajax function to call grade data
+      async function AjaxCallGrade(courseID, accesskey){
+        try {
+          //Canvas API call for the grade history for the given course
+          $.ajax({
+            url: corsAnywhere + 'https://asu.instructure.com/api/v1/courses/' + courseID + '/gradebook_history/feed?per_page=100',
+            datatype: "json",
+            headers: {
+              "Authorization": "Bearer " + accesskey,
+              "x-requested-with": "xhr"
+            },
+            success: async function(res, status, xhr) {
+              await sleep(75)
+              console.log("GRADEBOOK HISTORY");
+              var remainingPages = xhr.getResponseHeader("link");
+              courseGradeData = res
+
+              if (remainingPages != null) {
+                await ReturnAllRemaining(remainingPages, accesskey, "Grades").then();
+              }
+
+              ParseGradeJson()
+            },
+            error: function(xhr, status, error) {
+              console.log(xhr.responseText);
+            },
+          })
+
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      //parse the assignment data for the course
+      function ParseJsonToAssignment(){
+        if(courseAssignmentData != undefined){
+          courseAssignmentData.forEach((item, i) => {
+            Assignments[item.id] = new Assignment(item.id, item.name, item.description, item.points_possible)
+          })
+        }
+      }
+
+      //Parse the grade data for the course
+      function ParseGradeJson(){
+        if(courseGradeData != undefined){
+          courseGradeData.forEach((item, i) => {
+            Assignments[item.assignment_id].AppendGrade(item)
+          })
+
+          for(let id in Assignments){
+            Assignments[id].CalcAssignmentAverage()
+          }
+
+          for(i = 0; i < Keywords.length; i++){
+            Keywords[i].CalcKeywordAverage()
+          }
+
+          console.log("ASSIGNMENT OBJECTS")
+          console.log(Assignments)
+
+          console.log("KEYWORD OBJECTS")
+          console.log(Keywords)
+        }
+      }
 
       //helper for ParseLinkHead Function
       //from https://bill.burkecentral.com/2009/10/15/parsing-link-headers-with-javascript-and-java/
@@ -337,30 +391,26 @@
         var matches = value.match(linkexp);
         var rels = new Object();
         var titles = new Object();
-        for (i = 0; i < matches.length; i++)
-        {
-           var split = matches[i].split('>');
-           var href = split[0].substring(1);
-           var ps = split[1];
-           var link = new Object();
-           link.href = href;
-           var s = ps.match(paramexp);
-           for (j = 0; j < s.length; j++)
-           {
-              var p = s[j];
-              var paramsplit = p.split('=');
-              var name = paramsplit[0];
-              link[name] = unquote(paramsplit[1]);
-           }
+        for (i = 0; i < matches.length; i++) {
+          var split = matches[i].split('>');
+          var href = split[0].substring(1);
+          var ps = split[1];
+          var link = new Object();
+          link.href = href;
+          var s = ps.match(paramexp);
+          for (j = 0; j < s.length; j++) {
+            var p = s[j];
+            var paramsplit = p.split('=');
+            var name = paramsplit[0];
+            link[name] = unquote(paramsplit[1]);
+          }
 
-           if (link.rel != undefined)
-           {
-              rels[link.rel] = link;
-           }
-           if (link.title != undefined)
-           {
-              titles[link.title] = link;
-           }
+          if (link.rel != undefined) {
+            rels[link.rel] = link;
+          }
+          if (link.title != undefined) {
+            titles[link.title] = link;
+          }
         }
         var linkheader = new Object();
         linkheader.rels = rels;
@@ -368,6 +418,7 @@
         return linkheader;
       }
 
+      //function allows for application to 'halt' for x ms
       function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
@@ -380,37 +431,39 @@
 
         //while there is no last page or the current page does not equal the last page
         while (linkParser.rels.last === undefined || linkParser.rels.current.href != linkParser.rels.last.href) {
-            await $.ajax({
-              url: corsAnywhere + linkParser.rels.next.href,
-              datatype: "jsonp",
-              headers: {"Authorization": "Bearer " + accesskey,
-                        "x-requested-with": "xhr"},
-              success: async function(res, status, xhr) {
-                await sleep(50)
-                remainingPages = xhr.getResponseHeader("link");
+          await $.ajax({
+            url: corsAnywhere + linkParser.rels.next.href,
+            datatype: "jsonp",
+            headers: {
+              "Authorization": "Bearer " + accesskey,
+              "x-requested-with": "xhr"
+            },
+            success: async function(res, status, xhr) {
+              await sleep(50)
+              remainingPages = xhr.getResponseHeader("link");
 
-                //make sure that there was a link header in the last call
-                if(remainingPages != null && remainingPages != undefined){
-                  console.log("New Page " + callType )
+              //make sure that there was a link header in the last call
+              if (remainingPages != null && remainingPages != undefined) {
+                console.log("New Page " + callType)
 
-                  if (callType == "Students") {
-                      courseStudentData = courseStudentData.concat(res)
-                  } else if (callType == "Grades") {
-                      courseGradeData = courseGradeData.concat(res);
-                  } else if (callType == "Assignments") {
-                      courseAssignmentData = courseGradeData.concat(res);
-                  }
-
-                  //set the current linkparser to the new link header
-                  linkParser = ParseLinkHead(remainingPages)
+                if (callType == "Students") {
+                  courseStudentData = courseStudentData.concat(res)
+                } else if (callType == "Grades") {
+                  courseGradeData = courseGradeData.concat(res);
+                } else if (callType == "Assignments") {
+                  courseAssignmentData = courseGradeData.concat(res);
                 }
-              },
-              error: function(xhr, status, error) {
-                console.log(xhr.responseText);
-              }
-            })
 
-            await sleep(100)
+                //set the current linkparser to the new link header
+                linkParser = ParseLinkHead(remainingPages)
+              }
+            },
+            error: function(xhr, status, error) {
+              console.log(xhr.responseText);
+            }
+          })
+
+          await sleep(100)
         }
       }
 
@@ -432,6 +485,7 @@
       }
 
       //event raised when the selected student list value is changed
+      //May not be needed due to current node structure
       function SelectedStudentChanged(studentName) {
 
       }
@@ -474,7 +528,7 @@
             method: 'GET',
             headers: {
               'x-requested-with': 'xhr',
-              'Authorization' : 'Bearer ' + accesskey
+              'Authorization': 'Bearer ' + accesskey
             },
             beforeSend: function(xhr) {
               //xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
@@ -7042,12 +7096,177 @@
 
       }
 
+      //Function from Azaria.
+      //Used to parse out keywords from an assignment description
+      function ParseKeywords(description) {
+        var regexp = /(\s|^)#\w\w+\b/gm;
+        let result = description.match(regexp);
+        if (result) {
+          result = result.map((keyword) => {
+            keyword = keyword.trim();
+            keyword = keyword.replace(/[_-]/g, " ");
+            return keyword.substring(1);
+          });
+
+          return result;
+
+        } else {
+          return false;
+        }
+      }
+
+
+      //returns the index of the keyword
+      function KeywordIndex(keyword){
+        for(i  = 0; i < Keywords.length; i++){
+          if(Keywords[i].name == keyword){
+            return i
+          }
+        }
+
+        return -1
+      }
+
+      //checks if the keyword exists and appends additional associated keywords if they are not on the list
+      function HandleKeywords(keywords, id){
+
+        keywords.forEach((item, i) => {
+          var keyIdx = KeywordIndex(item)
+          if(keyIdx == -1){
+            Keywords.push(new Keyword(item))
+            keyIdx = Keywords.length - 1
+          }
+
+          Keywords[keyIdx].AppendAssignment(id)
+          Keywords[keyIdx].AppendToAssociatedKey(keywords, id)
+        })
+      }
+
+      //Calculates the average of assignments given a list
+      //expects an array of assignment ID's
+      function CalcAssignmentListAvg(assignments){
+        var total = 0
+
+        assignments.forEach((item, i) => {
+            total += Assignments[item].average
+        });
+
+        return parseFloat((total/assignments.length).toFixed(1))
+      }
+
+      //declaration for the assignment class
+      class Assignment {
+        constructor(id, name, desc, pts_Possible) {
+          this.id = id
+          this.name = name
+          this.desc = desc
+          this.totalPts = pts_Possible
+          this.grades = {}
+          this.average = -1
+
+          //check if this assignment is extraCredit
+          if(this.totalPts == 0){
+            this.extraCredit = true
+          }
+          else{
+            this.extraCredit = false
+          }
+
+          //if the description is not blank or null
+          if(this.desc != null && this.desc != ""){
+            var div = document.createElement("div");
+            div.innerHTML = desc;
+
+            this.keywords = ParseKeywords(div.textContent || div.innerText || "")
+
+            //if there were keywords in the description
+            if(this.keywords != false){
+              HandleKeywords(this.keywords, this.id)
+            }
+          }
+        }
+
+        //appends the given grade to the grade list if the ID matches
+        AppendGrade(gradeObject){
+
+          //if this assignment was extra credit just make the grade to be 100
+          if(this.totalPts == 0){
+            this.grades[gradeObject.user_name] = 100.0
+          }
+          else{
+            var roundedGrade = parseFloat(((gradeObject.current_grade / this.totalPts) * 100).toFixed(1))
+
+            //if this assignment contained extraCredit make the flag true
+            if(roundedGrade > 100){
+              this.extraCredit = true
+            }
+
+            this.grades[gradeObject.user_name] = roundedGrade
+          }
+        }
+
+        //function to calculate the total assignment average
+        CalcAssignmentAverage(){
+          var total = 0
+          var count = Object.keys(this.grades).length
+          for(let key in this.grades){
+            total += this.grades[key]
+          }
+
+          this.average = parseFloat((total/count).toFixed(1))
+        }
+      }
+
+      class Keyword{
+        constructor(name){
+          this.name = name
+          this.keyword_Avg = 0
+          this.associatedKeys = {}
+          this.assignments = []
+
+          //used for later features
+          this.category = null
+        }
+
+        //function to calculate the total assignment average
+        CalcKeywordAverage(){
+          this.keyword_Avg = CalcAssignmentListAvg(this.assignments)
+        }
+
+        //appends the given assignment to the assignments list
+        AppendAssignment(assignmentID){
+          this.assignments.push(assignmentID)
+        }
+
+        //appends the given keywords to the associatedKeys list
+        AppendToAssociatedKey(keywords, assignmentID){
+          keywords.forEach((item, i) => {
+            if(item != this.name){
+              if(this.associatedKeys[item] == undefined){
+                this.associatedKeys[item] = []
+              }
+
+              this.associatedKeys[item].push(assignmentID)
+            }
+          })
+        }
+      }
+
+      class Category{
+        constructor(name, color, id){
+          this.name = name
+          this.color = color
+          this.id = id
+        }
+      }
+
       //************************** start of main() **************************
 
       $(document).ready(function() {
         GetCourseData();
       })
 
+      //Rangeslide may no longer be needed
       // $(".js-range-slider-1").ionRangeSlider({
       //   skin: "sharp",
       //   type: "double",
