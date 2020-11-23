@@ -269,7 +269,7 @@
         var token = GetCookie("token")
         var nameOfClass = GetCookie("nameOfClass")
         if(token != "" && token != null && nameOfClass != "" && nameOfClass != null){
-          alert("Here is your saved token: " + token + " and here is your saved class " + nameOfClass)
+          //alert("Here is your saved token: " + token + " and here is your saved class " + nameOfClass)
 
           document.getElementById("course").value = nameOfClass
           document.getElementById("accesskey".value = token)
@@ -609,9 +609,9 @@
             beforeSend: function(xhr) {
               //xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
             },
-            success: async function(jsondata) {
+            success: function(jsondata) {
               if (jsondata.length != 0) {
-                await PopulateOnLoad(jsondata);
+                PopulateOnLoad(jsondata);
               }
             },
             error: function(xhr, status, error) {
