@@ -172,8 +172,11 @@
     <div id="mynetwork"></div>
 
     <center>
-      <a href="#" class="btn_Test" onclick="btn_testClick()">Test</a>
+
+      <!--<a href="#" class="btn_Test" onclick="btn_testClick()">Test</a>-->
+
       <br /> <br />
+
       <label for="courseId" style="color: white">Course</label>
       <select name="course" id="course" onchange="FetchData(this.value)" style="text-align:center">
         <option value="" disabled selected>Select</option>
@@ -187,7 +190,7 @@
       <br /> <br />-->
 
       <label for="accesskey" style="color: white">Access Token</label>
-      <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center">
+      <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center" onchange="SetTokenCookie()" onkeyup="SetTokenCookie">
       <br /> <br />
 
       <!--<div class="container-RS">
@@ -225,6 +228,76 @@
       var keywordCount = 0;
       var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"; //NEEDED TO CREATE A 'PROPER' CORS API CALL
 
+      //Cookies
+      function SetCookie(name, value, days){
+        if(days){
+          var date = new Date()
+          date.setTime(date.getTime() + (days*24*60*60*1000))
+          var expires = "; expires=" + date.toUTCString()
+        }
+        else {
+          var expires = ""
+        }
+
+        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path =/"
+      }
+
+      function GetCookie(name){
+        var nameEQ = name + "="
+        //handle special characters
+        var decodeCookie = decodeURIComponent(document.cookie)
+        var ca = decodeCookie.split(';')
+        for (var i = 0; i < ca.length; i++){
+          var c= ca[i]
+          while(c.charAt() == ' '){
+            c = c.substring(1, c.length)
+          }
+
+          if(c.indexOf(nameEQ) == 0){
+            return c.substring(nameEQ.length, c.length)
+          }
+        }
+
+        return null
+      }
+
+      function EraseCookie(name){
+        SetCookie(name, "", -1)
+      }
+
+      function CheckCookie(){
+        var token = GetCookie("token")
+        var nameOfClass = GetCookie("nameOfClass")
+        if(token != "" && token != null && nameOfClass != "" && nameOfClass != null){
+          alert("Here is your saved token: " + token + " and here is your saved class " + nameOfClass)
+
+          document.getElementById("course").value = nameOfClass
+          document.getElementById("accesskey".value = token)
+
+          FetchData(nameOfClass)
+        }
+        else{
+          SetTokenCookie()
+          SetClassCookie()
+        }
+      }
+
+      function SetTokenCookie(){
+        token = document.getElementById("accesskey").value //insert variables
+
+        if(token != "" && token != null){
+          SetCookie("token", token, 365)
+        }
+      }
+
+      function SetClassCookie(){
+        nameOfClass = document.getElementById("course").value //insert variables
+
+        if(nameOfClass != "" && nameOfClass != null){
+          SetCookie("nameOfClass", nameOfClass, 365)
+        }
+      }
+
       //NJT Access key 7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7
       //this is called each time the selected value for the "courses" dropdownlist is changed
       async function FetchData(courseName) {
@@ -232,6 +305,8 @@
         //Retrieve relevant information for the API call
         accesskey = document.getElementById("accesskey").value
         var courseID = GetCourseIDByName(courseName);
+
+        SetClassCookie()
 
         AjaxCallAssignments(courseID, accesskey)
 
@@ -273,7 +348,6 @@
         */
 
       }
-
 
       //Ajax function to call assignment data
       async function AjaxCallAssignments(courseID, accesskey){
@@ -503,6 +577,8 @@
         })
 
         document.getElementById("course").innerHTML = catOptions;
+
+        CheckCookie()
       }
 
       function GetCourseByID(courses, courseID) {
@@ -533,9 +609,9 @@
             beforeSend: function(xhr) {
               //xhr.setRequestHeader("Authorization", "Bearer " + accesskey);
             },
-            success: function(jsondata) {
+            success: async function(jsondata) {
               if (jsondata.length != 0) {
-                PopulateOnLoad(jsondata);
+                await PopulateOnLoad(jsondata);
               }
             },
             error: function(xhr, status, error) {
@@ -836,7 +912,6 @@
         }
       }
 
-
       //returns the index of the keyword
       function KeywordIndex(keyword){
         for(i  = 0; i < Keywords.length; i++){
@@ -980,6 +1055,7 @@
           this.id = id
         }
       }
+
 
       //************************** start of main() **************************
 
