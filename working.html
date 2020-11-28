@@ -744,7 +744,7 @@
             let edgeAverage = CalcAssignmentListAvg(
               keyword.associatedKeys[keywordName]
             );
-            edgeJson.length = Math.round(100 - edgeAverage + 50);
+            edgeJson.length = Math.round(100 - edgeAverage + 1) + 100;
             edgeJson.title = "<b>Class Grade Average: </b>" + edgeAverage + "%";
             if (edgeAverage == -1) {
               graded = false;
@@ -791,11 +791,9 @@
           physics: {
             barnesHut: {
               avoidOverlap: 1,
-              springConstant: 0.005,
-              centralGravity: 0.5,
-              gravitationalConstant: -2000,
+              springConstant: 0.2,
+              centralGravity: 0.3,
             },
-            minVelocity: 0.3,
           },
           interaction: {
             hover: false,
