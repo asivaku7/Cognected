@@ -942,12 +942,24 @@
       //expects an array of assignment ID's
       function CalcAssignmentListAvg(assignments){
         var total = 0
+        var notGradedCount = 0
 
         assignments.forEach((item, i) => {
+          if(Assignments[item].average != -1){
             total += Assignments[item].average
+          }
+          else{
+            notGradedCount += 1
+          }
         });
 
-        return parseFloat((total/assignments.length).toFixed(1))
+        var assignmentCount = assignments.length - notGradedCount
+        var KeywordAvg = -1
+        if(assignmentCount != 0){
+          KeywordAvg = parseFloat((total/assignmentCount).toFixed(1))
+        }
+
+        return KeywordAvg
       }
 
       //declaration for the assignment class
@@ -1000,7 +1012,7 @@
             this.grades[gradeObject.user_name] = roundedGrade
           }
         }
-
+        
         //function to calculate the total assignment average
         CalcAssignmentAverage(){
           var total = 0
@@ -1009,7 +1021,12 @@
             total += this.grades[key]
           }
 
-          this.average = parseFloat((total/count).toFixed(1))
+          if(count == 0){
+            this.average = -1
+          }
+          else{
+            this.average = parseFloat((total/count).toFixed(1))
+          }
         }
       }
 
