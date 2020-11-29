@@ -32,8 +32,8 @@
       #mynetwork {
         width: 50%;
         height: 40vw;
-        background-color: #222222;
-        border: 1px solid lightgray;
+        background-color: #FFFFFF ;
+        /*border: 1px solid lightgray;*/
         position: relative;
         margin: 0 auto;
         float: center;
@@ -237,9 +237,9 @@
         value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7"
         size="85px"
         style="text-align: center"
-        onchange="SetTokenCookie()"
-        onkeyup="SetTokenCookie()"
-        onpaste="SetTokenCookie()"
+        onchange="GetCourseData()"
+        onkeyup="GetCourseData()"
+        onpaste="GetCourseData()"
       />
       <br />
       <br />
@@ -338,10 +338,6 @@
         token = document.getElementById("accesskey").value; //insert variables
 
         if(token != "" && token != null && token.length > 60){
-          if(token != GetCookie("token")){
-            GetCourseData()
-          }
-
           SetCookie("token", token, 365)
         }
       }
@@ -725,6 +721,8 @@
             "</b><br/><b>Class Grade Average: </b>" +
             keyword.keyword_Avg +
             "%";
+          nodeJson.label = keyword.name
+          nodeJson.labelHighlightBold = 'true'
           nodeJson.value = keyword.keyword_Avg;
           nodes.push(nodeJson);
         });
@@ -802,11 +800,12 @@
 
         network = new vis.Network(container, data, options);
 
-        // get a JSON object
-        // allNodes = nodes.get({
-        //   returnType: "Object",
-        // });
-
+         //get a JSON object
+        //  tempNodes = new vis.DataSet(keywordNodes)
+        //  allNodes = tempNodes.get({
+        //    returnType: "Object",
+        //  });
+        //
         // network.on("click", function (params) {
         //   neighbourhoodHighlight(params);
         // });
@@ -906,7 +905,7 @@
           highlightActive = true;
           var i, j;
           var selectedNode = params.nodes[0];
-          var degrees = 1;
+          var degrees = 2;
 
           // mark all nodes as hard to read.
           for (var nodeId in allNodes) {
@@ -957,13 +956,7 @@
         } else if (highlightActive === true) {
           // reset all nodes
           for (var nodeId in allNodes) {
-            //added if statement to fix greying out bug on all nodes in group 10
-            if (allNodes[nodeId].group == 10) {
-              allNodes[nodeId].color = "rgba(128,0,128,1)";
-            } else {
-              allNodes[nodeId].color = undefined;
-            }
-
+            allNodes[nodeId].color = undefined;
             if (allNodes[nodeId].hiddenLabel !== undefined) {
               allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
               allNodes[nodeId].hiddenLabel = undefined;
@@ -979,7 +972,7 @@
             updateArray.push(allNodes[nodeId]);
           }
         }
-        nodes.update(updateArray);
+        data.nodes.update(updateArray);
       }
 
       //event raised when the test button is clicked
