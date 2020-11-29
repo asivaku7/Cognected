@@ -190,7 +190,7 @@
       <br /> <br />-->
 
       <label for="accesskey" style="color: white">Access Token</label>
-      <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center" onchange="SetTokenCookie()" onkeyup="SetTokenCookie">
+      <input type="text" id="accesskey" name="accesskey" value="7236~8dQSbbxT2iQeatKfNOJYzWR441OHkkv5CcUOr4sksrHNmdk1SRQoJG5wrut4e0s7" size="85px" style="text-align:center" onchange="SetTokenCookie()" onkeyup="SetTokenCookie()" onpaste="SetTokenCookie()">
       <br /> <br />
 
       <!--<div class="container-RS">
@@ -285,8 +285,9 @@
       function SetTokenCookie(){
         token = document.getElementById("accesskey").value //insert variables
 
-        if(token != "" && token != null){
+        if(token != "" && token != null && token.length > 60){
           SetCookie("token", token, 365)
+          GetCourseData()
         }
       }
 
@@ -566,7 +567,7 @@
 
       //Populates the course list with the given class data
       //concatenates the data with the current data in the course list
-      function PopulateOnLoad(classData) {
+      function PopulateCourses(classData) {
         var catOptions = document.getElementById("course").innerHTML;
         courses = courses.concat(classData);
 
@@ -611,7 +612,7 @@
             },
             success: function(jsondata) {
               if (jsondata.length != 0) {
-                PopulateOnLoad(jsondata);
+                PopulateCourses(jsondata);
               }
             },
             error: function(xhr, status, error) {
@@ -1012,7 +1013,7 @@
             this.grades[gradeObject.user_name] = roundedGrade
           }
         }
-        
+
         //function to calculate the total assignment average
         CalcAssignmentAverage(){
           var total = 0
