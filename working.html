@@ -238,7 +238,8 @@
         size="85px"
         style="text-align: center"
         onchange="SetTokenCookie()"
-        onkeyup="SetTokenCookie"
+        onkeyup="SetTokenCookie()"
+        onpaste="SetTokenCookie()"
       />
       <br />
       <br />
@@ -286,8 +287,7 @@
           var expires = "";
         }
 
-        document.cookie =
-          name + "=" + encodeURIComponent(value) + expires + "; path =/";
+        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path =/";
       }
 
       function GetCookie(name) {
@@ -338,8 +338,11 @@
         token = document.getElementById("accesskey").value; //insert variables
 
         if(token != "" && token != null && token.length > 60){
+          if(token != GetCookie("token")){
+            GetCourseData()
+          }
+
           SetCookie("token", token, 365)
-          GetCourseData()
         }
       }
 
@@ -640,7 +643,9 @@
       //Populates the course list with the given class data
       //concatenates the data with the current data in the course list
       function PopulateCourses(classData) {
-        var catOptions = document.getElementById("course").innerHTML;
+        document.getElementById("course").innerHTML = "<option>Courses List</option>";
+
+        var catOptions = ""
         courses = courses.concat(classData);
 
         classData.forEach((item, i) => {
@@ -665,13 +670,7 @@
       //Get the course data with the given enrollment types
       function GetCourseData() {
         //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
-        var enrollmentTypes = [
-          "StudentEnrollment",
-          "TeacherEnrollment",
-          "TaEnrollment",
-          "ObserverEnrollment",
-          "DesignerEnrollment",
-        ];
+        var enrollmentTypes = ["StudentEnrollment","TeacherEnrollment","TaEnrollment","ObserverEnrollment", "DesignerEnrollment"];
         accesskey = document.getElementById("accesskey").value;
 
         //get course data for each enrollment type
@@ -987,12 +986,6 @@
       function btn_testClick() {
         console.log("Button Test Clicked");
       }
-
-      //place holder function may not be used
-      function RemakeNodeStructure() {}
-
-      //place holder function may not be used
-      function RemakeEdgeStructure() {}
 
       //Function from Azaria.
       //Used to parse out keywords from an assignment description
