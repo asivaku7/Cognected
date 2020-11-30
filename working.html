@@ -639,9 +639,7 @@
       //Populates the course list with the given class data
       //concatenates the data with the current data in the course list
       function PopulateCourses(classData) {
-        document.getElementById("course").innerHTML = "<option>Courses List</option>";
-
-        var catOptions = ""
+        var catOptions = document.getElementById("course").innerHTML
         courses = courses.concat(classData);
 
         classData.forEach((item, i) => {
@@ -667,6 +665,7 @@
       function GetCourseData() {
         //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
         var enrollmentTypes = ["StudentEnrollment","TeacherEnrollment","TaEnrollment","ObserverEnrollment", "DesignerEnrollment"];
+        document.getElementById("course").innerHTML = "";
         accesskey = document.getElementById("accesskey").value;
 
         //get course data for each enrollment type
