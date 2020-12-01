@@ -30,13 +30,14 @@
 
     <style type="text/css">
       #mynetwork {
+        min-width: 50%;
         width: 50%;
-        height: 40vw;
+        height: 38vw;
         background-color: #FFFFFF ;
-        /*border: 1px solid lightgray;*/
-        position: relative;
+        position: static;
         margin: 0 auto;
-        float: center;
+        margin-left: 25%;
+        float: left;
       }
 
       #loadingBar {
@@ -203,12 +204,25 @@
   </head>
 
   <body style="background-color: #222222">
+
     <div id="mynetwork"></div>
+    <p style="color: white; font-size:20px">
+          1. Each <b>keyword</b> from each of your assignments is an individual node on the graph<br/>
+          2. The <b>size of the node</b> is determined from the average of all the assignments where that keyword appears<br/>
+              &emsp;a. For example, if the <i>#critical_thinking_skills</i> appears in <i>assignment 1</i> and <i>quiz 1</i>, the size of the node is determined by the average of all grades on both assignments<br/>
+              &emsp;b. Bigger nodes means a higher average<br/>
+          3. The <b>distance between nodes</b> is determined by the average grade of the assignments where both connected keywords appeared<br/>
+              &emsp;a. For example, if the <i>#critical_thinking_skills</i> and <i>#rough_draft</i> appeared on the same one or multiple assignments, a connection between the two keywords is formed<br/>
+              &emsp;b. The length between nodes is determined by the total average of all grades on both assignments where both keywords appear in the description.<br/>
+                  &emsp;&emsp;i. The further apart means that the lower the average grade was when both keywords appeared<br/>
+    </p>
+
+    <div style="clear: both;"></div>
 
     <center>
       <!--<a href="#" class="btn_Test" onclick="btn_testClick()">Test</a>-->
       <br />
-      <label style="color: white">Please allow a few seconds for loading, retrieveing a course list, and when selecting a course.</label>
+      <label style="color: white" id="loadingMessage">Please allow a few seconds for loading, retrieveing a course list, and when selecting a course.</label>
       <br />
       <br />
 
@@ -358,6 +372,7 @@
       async function FetchData(courseName) {
         //Retrieve relevant information for the API call
         accesskey = document.getElementById("accesskey").value;
+        document.getElementById("loadingMessage").innerHTML = "Retrieving Assignment and Grade Data"
         var courseID = GetCourseIDByName(courseName);
 
         SetClassCookie();
@@ -513,6 +528,8 @@
             Keywords[i].CalcKeywordAverage();
           }
 
+          document.getElementById("loadingMessage").innerHTML = "Creating Graph"
+
           console.log("ASSIGNMENT OBJECTS");
           console.log(Assignments);
 
@@ -667,6 +684,7 @@
       //Get the course data with the given enrollment types
       function GetCourseData() {
         //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
+        document.getElementById("loadingMessage").innerHTML = "Retrieving Classes based on Token"
         var enrollmentTypes = ["TeacherEnrollment","TaEnrollment","ObserverEnrollment", "DesignerEnrollment"];
         document.getElementById("course").innerHTML = "";
         accesskey = document.getElementById("accesskey").value;
@@ -896,6 +914,8 @@
         //     document.getElementById("loadingBar").style.display = "none";
         //   }, 500);
         // });
+
+        document.getElementById("loadingMessage").innerHTML = "Graph Complete!"
 
         return network;
       }
