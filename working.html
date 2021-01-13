@@ -537,7 +537,12 @@
           console.log("KEYWORD OBJECTS");
           console.log(Keywords);
 
-          drawGraph();
+          if(Keywords.count > 0) {
+            drawGraph();
+          }
+          else{
+            document.getElementById("loadingMessage").innerHTML = "No Keywords found in Assignments"
+          }
         }
       }
 
