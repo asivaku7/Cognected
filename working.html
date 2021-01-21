@@ -537,7 +537,7 @@
           console.log("KEYWORD OBJECTS");
           console.log(Keywords);
 
-          if(Keywords.count > 0) {
+          if(Keywords.length > 0) {
             drawGraph();
           }
           else{
@@ -741,14 +741,16 @@
         Keywords.forEach((keyword) => {
           let nodeJson = {};
           nodeJson.id = KeywordIndex(keyword.name);
-          nodeJson.title =
-            keyword.name +
-            "\n Class Grade Average: " +
-            keyword.keyword_Avg +
-            "%";
+          nodeJson.title = keyword.name + "\n Class Grade Average: " + keyword.keyword_Avg + "%";
           nodeJson.label = keyword.name
           nodeJson.labelHighlightBold = 'true'
           nodeJson.value = keyword.keyword_Avg;
+
+          // nodeJson.shape = 'circle'
+          // nodeJson.scaling.label.enabled = 'true'
+          // nodeJson.scaling.label.min = keyword.keyword_Avg
+          // nodeJson.scaling.label.max = keyword.keyword_Avg
+
           nodes.push(nodeJson);
         });
 
