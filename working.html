@@ -245,6 +245,20 @@
       </select>
       <br /> <br />-->
 
+      <label for="canvasURL" style="color: white">Canvas URL</label>
+      <input
+        type="text"
+        id="canvasURL"
+        name="canvasURL"
+        value="https://asu.instructure.com"
+        size="85px"
+        style="text-align: center"
+        onchange="GetCourseData()"
+        onpaste="GetCourseData()"
+      />
+      <br />
+      <br />
+
       <label for="accesskey" style="color: white">Access Token</label>
       <input
         type="text"
@@ -334,19 +348,18 @@
       function CheckCookie() {
         var token = GetCookie("token");
         var nameOfClass = GetCookie("nameOfClass");
-        if (
-          token != "" &&
-          token != null &&
-          nameOfClass != "" &&
-          nameOfClass != null
-        ) {
+        var canvasURL = GetCookie("canvasURL");
+
+        if ( token != "" && token != null && nameOfClass != "" && nameOfClass != null && canvasURL != "" && canvasURL != null) {
           //alert("Here is your saved token: " + token + " and here is your saved class " + nameOfClass)
 
           document.getElementById("course").value = nameOfClass;
-          document.getElementById(("accesskey".value = token));
+          document.getElementById("accesskey").value = token;
+          document.getElementById("canvasURL").value = canvasURL;
 
           FetchData(nameOfClass);
         } else {
+          SetCavanvasURLCookie();
           SetTokenCookie();
           SetClassCookie();
         }
@@ -357,6 +370,14 @@
 
         if(token != "" && token != null && token.length > 60){
           SetCookie("token", token, 365)
+        }
+      }
+
+      function SetCavanvasURLCookie(){
+        canvasURL = document.getElementById("canvasURL").value; //insert variables
+
+        if(canvasURL != "" && canvasURL != null){
+          SetCookie("canvasURL", token, 365)
         }
       }
 
@@ -420,12 +441,14 @@
 
       //Ajax function to call assignment data
       async function AjaxCallAssignments(courseID, accesskey) {
+        canvasURL = document.getElementById("canvasURL").value
+
         try {
           //Canvas API call for the ASSIGNMENT for the given course
           $.ajax({
             url:
-              corsAnywhere +
-              "https://asu.instructure.com/api/v1/courses/" +
+              corsAnywhere + canvasURL +
+              "/api/v1/courses/" +
               courseID +
               "/assignments?per_page=100",
             datatype: "jsonp",
@@ -462,12 +485,14 @@
 
       //Ajax function to call grade data
       async function AjaxCallGrade(courseID, accesskey) {
+        canvasURL = document.getElementById("canvasURL").value
+
         try {
           //Canvas API call for the grade history for the given course
           $.ajax({
             url:
-              corsAnywhere +
-              "https://asu.instructure.com/api/v1/courses/" +
+              corsAnywhere + canvasURL +
+              "/api/v1/courses/" +
               courseID +
               "/gradebook_history/feed?per_page=100",
             datatype: "json",
@@ -694,13 +719,14 @@
         var enrollmentTypes = ["TeacherEnrollment","TaEnrollment","ObserverEnrollment", "DesignerEnrollment"];
         document.getElementById("course").innerHTML = "";
         accesskey = document.getElementById("accesskey").value;
+        canvasURL = document.getElementById("canvasURL").value;
 
         //get course data for each enrollment type
         enrollmentTypes.forEach((item, i) => {
           $.ajax({
             url:
-              corsAnywhere +
-              "https://asu.instructure.com/api/v1/courses?enrollment_role=" +
+              corsAnywhere + canvasURL +
+              "/api/v1/courses?enrollment_role=" +
               item,
             datatype: "json",
             method: "GET",
@@ -747,9 +773,11 @@
           nodeJson.value = keyword.keyword_Avg;
 
           // nodeJson.shape = 'circle'
-          // nodeJson.scaling.label.enabled = 'true'
-          // nodeJson.scaling.label.min = keyword.keyword_Avg
-          // nodeJson.scaling.label.max = keyword.keyword_Avg
+          // nodeJson.scaling = {}
+          // nodeJson.scaling.label = 'true'
+          // nodeJson.scaling.min = keyword.keyword_Avg
+          // nodeJson.scaling.max = keyword.keyword_Avg
+          // nodeJson.value = 1;
 
           nodes.push(nodeJson);
         });
@@ -770,7 +798,7 @@
               keyword.associatedKeys[keywordName]
             );
             edgeJson.length = Math.round(100 - edgeAverage + 1) + 100;
-            edgeJson.title = "<b>Class Grade Average: </b>" + edgeAverage + "%";
+            edgeJson.title = "Class Grade Average: " + edgeAverage + "%";
             if (edgeAverage == -1) {
               graded = false;
             }
