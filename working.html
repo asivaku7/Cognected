@@ -254,7 +254,7 @@
         size="85px"
         style="text-align: center"
         onchange="GetCourseData()"
-        onpaste="GetCourseData()"
+        onkeyup="GetCourseData()"
       />
       <br />
       <br />
@@ -269,7 +269,6 @@
         style="text-align: center"
         onchange="GetCourseData()"
         onkeyup="GetCourseData()"
-        onpaste="GetCourseData()"
       />
       <br />
       <br />
@@ -308,7 +307,8 @@
       var Keywords = [];
       var keywordCount = 0;
       var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"; //NEEDED TO CREATE A 'PROPER' CORS API CALL
-      var cookiesChecked = false
+      var cookiesChecked = false;
+      var onload = true;
 
       //Cookies
       function SetCookie(name, value, days) {
@@ -350,34 +350,23 @@
         var token = GetCookie("token");
         var nameOfClass = GetCookie("nameOfClass");
         var canvasURL = GetCookie("canvasURL");
-        var allValidCookie = 0
 
-        if(canvasURL != "" && canvasURL != null){
+        if(canvasURL != "" && canvasURL != null && canvasURL != document.getElementById("canvasURL").value){
           document.getElementById("canvasURL").value = canvasURL;
-          allValidCookie += 1;
         } else{
           SetCavanvasURLCookie()
         }
 
-        if ( token != "" && token != null) {
+        if ( token != "" && token != null && token != document.getElementById("accesskey").value) {
           document.getElementById("accesskey").value = token;
-          allValidCookie += 1;
         } else {
           SetTokenCookie()
         }
 
-        if(nameOfClass != "" && nameOfClass != null){
+        if(nameOfClass != "" && nameOfClass != null && nameOfClass != document.getElementById("course").value){
           document.getElementById("course").value = nameOfClass;
-          allValidCookie += 1;
         } else {
           SetClassCookie()
-        }
-
-        if(allValidCookie == 3){
-          FetchData(nameOfClass);
-        }
-        else{
-          document.getElementById("loadingMessage").innerHTML = "Invalid Course / URL / or Token"
         }
       }
 
@@ -713,7 +702,7 @@
       //Populates the course list with the given class data
       //concatenates the data with the current data in the course list
       function PopulateCourses(classData) {
-        var catOptions = document.getElementById("course").innerHTML
+        var catOptions = document.getElementById("course").innerHTML;
         courses = courses.concat(classData);
 
         classData.forEach((item, i) => {
@@ -724,7 +713,13 @@
 
         document.getElementById("course").innerHTML = catOptions;
 
-        CheckCookie();
+        if(!cookiesChecked){
+          let cookieCourse = document.getElementById("course").value
+          if(cookieCourse != ""){
+            cookiesChecked = true;
+            FetchData(cookieCourse);
+          }
+        }
       }
 
       function GetCourseByID(courses, courseID) {
@@ -737,9 +732,9 @@
 
       //Get the course data with the given enrollment types
       function GetCourseData() {
-        if(!cookiesChecked){
+        if(!cookiesChecked && onload){
           CheckCookie()
-          cookiesChecked = true
+          onload = false;
         }
 
         //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
@@ -748,7 +743,10 @@
         document.getElementById("course").innerHTML = "";
         accesskey = document.getElementById("accesskey").value;
         canvasURL = document.getElementById("canvasURL").value;
-        SetAllCookies()
+
+        if(cookiesChecked){
+          SetAllCookies()
+        }
 
         //get course data for each enrollment type
         enrollmentTypes.forEach((item, i) => {
