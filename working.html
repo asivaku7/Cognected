@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <!-- Scripts & Link for rangeSlider -->
-
+    <!-- Layout Branch -->
     <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css" />-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
@@ -164,7 +164,7 @@
         display: none;
       } */
 
-      .btn_Test {
+      .btn_Enter {
         box-shadow: inset 0px 1px 0px 0px #ffffff;
         background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
         background-color: #ffffff;
@@ -182,12 +182,12 @@
         margin-top: 15px;
       }
 
-      .btn_Test:hover {
+      .btn_Enter:hover {
         background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
         background-color: #f6f6f6;
       }
 
-      .btn_Test:active {
+      .btn_Enter:active {
         position: relative;
         top: 1px;
       }
@@ -308,6 +308,7 @@
       var Keywords = [];
       var keywordCount = 0;
       var corsAnywhere = "https://salty-atoll-62320.herokuapp.com/"; //NEEDED TO CREATE A 'PROPER' CORS API CALL
+      var cookiesChecked = false
 
       //Cookies
       function SetCookie(name, value, days) {
@@ -349,26 +350,47 @@
         var token = GetCookie("token");
         var nameOfClass = GetCookie("nameOfClass");
         var canvasURL = GetCookie("canvasURL");
+        var allValidCookie = 0
 
-        if ( token != "" && token != null && nameOfClass != "" && nameOfClass != null && canvasURL != "" && canvasURL != null) {
-          //alert("Here is your saved token: " + token + " and here is your saved class " + nameOfClass)
-
-          document.getElementById("course").value = nameOfClass;
-          document.getElementById("accesskey").value = token;
+        if(canvasURL != "" && canvasURL != null){
           document.getElementById("canvasURL").value = canvasURL;
-
-          FetchData(nameOfClass);
-        } else {
-          SetCavanvasURLCookie();
-          SetTokenCookie();
-          SetClassCookie();
+          allValidCookie += 1;
+        } else{
+          SetCavanvasURLCookie()
         }
+
+        if ( token != "" && token != null) {
+          document.getElementById("accesskey").value = token;
+          allValidCookie += 1;
+        } else {
+          SetTokenCookie()
+        }
+
+        if(nameOfClass != "" && nameOfClass != null){
+          document.getElementById("course").value = nameOfClass;
+          allValidCookie += 1;
+        } else {
+          SetClassCookie()
+        }
+
+        if(allValidCookie == 3){
+          FetchData(nameOfClass);
+        }
+        else{
+          document.getElementById("loadingMessage").innerHTML = "Invalid Course / URL / or Token"
+        }
+      }
+
+      function SetAllCookies(){
+        SetCavanvasURLCookie();
+        SetTokenCookie();
+        SetClassCookie();
       }
 
       function SetTokenCookie() {
         token = document.getElementById("accesskey").value; //insert variables
 
-        if(token != "" && token != null && token.length > 60){
+        if(token != "" && token != null){
           SetCookie("token", token, 365)
         }
       }
@@ -458,6 +480,7 @@
             },
             success: async function (res, status, xhr) {
               await sleep(75);
+
               console.log("ASSIGNMENTS");
               var remainingPages = xhr.getResponseHeader("link");
               courseAssignmentData = res;
@@ -714,12 +737,18 @@
 
       //Get the course data with the given enrollment types
       function GetCourseData() {
+        if(!cookiesChecked){
+          CheckCookie()
+          cookiesChecked = true
+        }
+
         //will need to remove the StudentEnrollment type for the final product. In use now for demo purposes
         document.getElementById("loadingMessage").innerHTML = "Retrieving Classes based on Token"
         var enrollmentTypes = ["TeacherEnrollment","TaEnrollment","ObserverEnrollment", "DesignerEnrollment"];
         document.getElementById("course").innerHTML = "";
         accesskey = document.getElementById("accesskey").value;
         canvasURL = document.getElementById("canvasURL").value;
+        SetAllCookies()
 
         //get course data for each enrollment type
         enrollmentTypes.forEach((item, i) => {
@@ -1033,7 +1062,7 @@
       }
 
       //event raised when the test button is clicked
-      function btn_testClick() {
+      function btn_EnterClick() {
         console.log("Button Test Clicked");
       }
 
